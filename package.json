@@ -1,0 +1,19 @@
+{
+  "name": "wedding-wish-express",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node api/wishes.js",
+    "start": "node api/wishes.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.19.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
