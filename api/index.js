@@ -37,12 +37,15 @@ app.post("/api/wishes", async (req, res) => {
   if (!applicationId || !guestId || !message) {
     return res.status(400).json({ error: "Invalid payload" });
   }
+  const timestamp = new Date().toISOString();
   const { error } = await supabase.from("wishes").upsert({
     id: crypto.randomUUID(),
     application_id: applicationId,
     guest_id: guestId,
     message,
     attendance,
+    created_at: timestamp,
+    updated_at: timestamp,
   }, {
     onConflict: "guest_id"
   });
