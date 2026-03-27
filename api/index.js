@@ -8,18 +8,18 @@ app.use(cors());
 app.use(express.json());
 
 // GET wishes
-app.get("/api", async (req, res) => {
-  const { invitationId } = req.query;
-    console.log(invitationId);
-  if (!invitationId) {
-    return res.status(400).json({ error: "invitationId required" });
+app.get("/api/wishes", async (req, res) => {
+  const { applicationId } = req.query;
+  console.log(applicationId);
+  if (!applicationId) {
+    return res.status(400).json({ error: "applicationId required" });
   }
 
   
   const { data, error } = await supabase
     .from("wishes")
     .select("*")
-    .eq("invitation_id", invitationId)
+    .eq("application_id", applicationId)
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -31,23 +31,23 @@ app.get("/api", async (req, res) => {
 });
 
 // POST wish
-app.post("/api", async (req, res) => {
-  const { invitationId, name, message, attendance,giphyId} = req.body;
+app.post("/api/wishes", async (req, res) => {
+  const { applicationId, guestId, message, attendance } = req.body;
+  console.log(req.body);
 
-
-  if (!invitationId || !name || !message) {
+  if (!applicationId || !guestId || !message) {
     return res.status(400).json({ error: "Invalid payload" });
   }
 
-  const { error } = await supabase.from("wishes").insert({
-    invitation_id: invitationId,
-    name,
+  const { error } = await supabase.from("wishes").upsert({
+    id: crypto.randomUUID(),
+    application_id: applicationId,
+    guest_id: guestId,
     message,
     attendance,
-    giphy_id:giphyId
+  }, {
+    onConflict: "guest_id"
   });
-
-  console.log(error);
 
 
   if (error) {
@@ -55,6 +55,26 @@ app.post("/api", async (req, res) => {
   }
 
   res.json({ success: true });
+});
+
+app.get("/api/guest", async (req, res) => {
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ error: "id required" });
+  }
+
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
 });
 // app.listen(5000,() => {
 //     console.log("runn");
