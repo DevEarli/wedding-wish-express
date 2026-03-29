@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const supabase = require("../lib/supabase.js");
+const rateLimit = require("express-rate-limit");
+
+
 
 const app = express();
 
@@ -30,12 +33,13 @@ app.get("/api/wishes", async (req, res) => {
   res.json(data);
 });
 
-// POST wish
+
+
 app.post("/api/wishes", async (req, res) => {
   const { applicationId, guestId, message, attendance } = req.body;
   console.log(req.body);
 
-  if (!applicationId || !guestId || !message) {
+  if (!applicationId || !guestId || !message || !attendance) {
     return res.status(400).json({ error: "Invalid payload" });
   }
 
@@ -46,7 +50,7 @@ app.post("/api/wishes", async (req, res) => {
     message,
     attendance,
   }, {
-    onConflict: "guest_id"
+    onConflict: "guest_id",
   });
 
 
@@ -57,12 +61,25 @@ app.post("/api/wishes", async (req, res) => {
   res.json({ success: true });
 });
 
-app.get("/api/guest", async (req, res) => {
-  const { id } = req.query;
+app.get("/api/guests", async (req, res) => {
+  const { applicationId } = req.query;
 
-  if (!id) {
+  if (!applicationId) {
     return res.status(400).json({ error: "id required" });
   }
+
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*");
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
+});
+
+app.get("/api/guests", async (req, res) => {
 
   const { data, error } = await supabase
     .from("guests")
