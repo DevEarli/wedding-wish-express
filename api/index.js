@@ -55,6 +55,19 @@ app.get("/api/wishes", async (req, res) => {
 });
 
 
+app.get("/api/wishes/attendance", async (req, res) => {
+  const { applicationId } = req.query;
+
+  const { data, error } = await supabase.rpc('get_enum_attendance', { application_id: applicationId });
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
+});
+
+
+
 
 app.post("/api/wishes", wishLimiter,async (req, res) => {
   const { applicationId, guestId, message, attendance } = req.body;
